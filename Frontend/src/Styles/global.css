@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@font-face {
+    font-family: 'mainHead';
+    font-size: smaller;
+    font-weight: 700;
+    src: url('/src/Fonts/PressStart2P-Regular.ttf') format('truetype');
+}
