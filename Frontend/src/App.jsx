@@ -12,9 +12,9 @@ function App() {
     <Theme/>
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/api/auth/signup" element={<Signup />} />
-      <Route path="/api/auth/login" element={<Login />} />
-      <Route path="/api/auth/logout" element={<Logout />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/logout" element={<Logout />} />
       <Route path='*' element={<Error />} />
     </Routes>
     </>
