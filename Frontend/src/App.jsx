@@ -6,6 +6,7 @@ import Landing from './Pages/Landing';
 import Error from './Pages/Error';
 import Theme from './Utilities/Theme';
 import { Toaster } from 'react-hot-toast'
+import DashBoard from './Pages/DashBoard';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path='*' element={<Error />} />
+        <Route path='dashboard' element = {<DashBoard/>}/>
       </Routes>
       <Toaster />
     </>
