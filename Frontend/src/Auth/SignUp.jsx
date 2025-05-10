@@ -1,15 +1,50 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 const SignUp = () => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: ''
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    })
+  }
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Signup form data:', { username, email, password });
+    try {
+      const response = await fetch(`http://localhost:3000/api/auth/signup`, {  //update later
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || "Sign up successfully!");
+        setFormData({ username: "", email: '', password: "" }); // Clear form
+        navigate("/dashboard"); // Redirect to dashboard
+      } else {
+        if (response.status === 404) {
+          toast.error("User does not exist");
+        } else if (response.status === 401) {
+          toast.error("Wrong username or password");
+        } else {
+          toast.error(data.error || "Login failed");
+        }
+      }
+    } catch (error) {
+      toast.error("Error signing up:" + error.message);
+    }
   };
 
   return (
@@ -32,8 +67,8 @@ const SignUp = () => {
                 id="username"
                 name="username"
                 type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={formData.username}
+                onChange={handleChange}
                 required
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm"
               />
@@ -48,15 +83,15 @@ const SignUp = () => {
                 id="email"
                 name="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleChange}
                 required
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm"
               />
             </div>
           </div>
 
-    
+
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-900">
               Password
@@ -66,8 +101,8 @@ const SignUp = () => {
                 id="password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={handleChange}
                 required
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm"
               />

@@ -1,14 +1,46 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-
-  const handleSubmit = (e) => {
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    })
+  }
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ username, email, password });
+    try {
+      const response = await fetch(`http://localhost:3000/api/auth/login`, {  //update later
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || "Login successfully!");
+        setFormData({ username: "", email: "", password: "" }); // Clear form
+        navigate("/dashboard"); // Redirect to dashboard
+      } else {
+        if (response.status === 404) {
+          toast.error("User does not exist");
+        } else if (response.status === 401) {
+          toast.error("Wrong username or password");
+        } else {
+          toast.error(data.error || "Login failed");
+        }
+      }
+    } catch (error) {
+      toast.error("Error logging in:" + error.message);
+    }
   };
 
   return (
@@ -22,7 +54,7 @@ const Login = () => {
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
-  
+
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-900">
@@ -33,8 +65,8 @@ const Login = () => {
                 id="email"
                 name="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleChange}
                 required
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm"
               />
@@ -57,8 +89,8 @@ const Login = () => {
                 id="password"
                 name="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={handleChange}
                 required
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm"
               />

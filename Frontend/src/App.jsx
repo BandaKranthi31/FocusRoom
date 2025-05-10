@@ -5,18 +5,20 @@ import Logout from './Auth/LogOut';
 import Landing from './Pages/Landing';
 import Error from './Pages/Error';
 import Theme from './Utilities/Theme';
+import { Toaster } from 'react-hot-toast'
 
 function App() {
   return (
     <>
-    <Theme/>
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/logout" element={<Logout />} />
-      <Route path='*' element={<Error />} />
-    </Routes>
+      <Theme />
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/logout" element={<Logout />} />
+        <Route path='*' element={<Error />} />
+      </Routes>
+      <Toaster />
     </>
   );
 }
