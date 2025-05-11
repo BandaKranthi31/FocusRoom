@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Popup from 'reactjs-popup';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useRoom } from '../Context/RoomContext'; 
+import { useRoom } from '../Context/RoomContext';
+import { toast } from 'react-hot-toast'
 
 const DashBoard = () => {
   const navigate = useNavigate();
-  const { roomSettings, setRoomSettings } = useRoom(); 
+  const [user, setUser] = useState(null)
+  const { roomSettings, setRoomSettings } = useRoom();
   const [isPrivate, setIsPrivate] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
 
-  const publicRooms = Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    name: `Room #${100 + Math.floor(Math.random() * 9000)}`,
-  }));
+  // const publicRooms = Array.from({ length: 10 }, (_, i) => ({
+  //   id: i + 1,
+  //   name: `Room #${100 + Math.floor(Math.random() * 9000)}`,
+  // }));
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -49,6 +51,33 @@ const DashBoard = () => {
     localStorage.setItem('roomSettings', JSON.stringify(roomSettings));
     navigate('/room');
   };
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/auth/current-user", {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await response.json();
+        if (data.success) {
+          setUser(data.user);
+          // console.log(data.user)
+        } else {
+          navigate("/login")
+          toast.error(data.message || "Something went wrong")
+        }
+      } catch (error) {
+        console.error("Error fetching current user", error)
+        toast.error("Something went wrong")
+        navigate("/login")
+      }
+    }
+    fetchCurrentUser();
+  }, [navigate])
 
   return (
     <div className="flex min-h-screen bg-gray-50 relative">
@@ -109,7 +138,7 @@ const DashBoard = () => {
 
       <div className="flex-1 p-6">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-          Welcome {"Fong"}
+          Welcome {user?.username || "User"}
         </h2>
 
         <div className="flex justify-center space-x-4">

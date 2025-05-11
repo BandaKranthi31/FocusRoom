@@ -1,4 +1,4 @@
-import { createUser, getUserByEmail, getUserByUsername } from "../services/user.service.js"
+import { createUser, getUserByEmail, getUserById, getUserByUsername } from "../services/user.service.js"
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
@@ -61,9 +61,18 @@ export const login = async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             path: '/',
-            maxAge: 24 * 60 * 60 * 1000 // 1 day
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
+            sameSite: 'lax'
         })
-        res.status(200).json({ success: true, message: "Login successful" })
+        res.status(200).json({
+            success: true,
+            message: "Login successful",
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email
+            }
+        })
     } catch (error) {
         console.error("Error in signin controller", error)
         res.status(500).json({ success: false, message: "Internal server error" })
@@ -81,6 +90,27 @@ export const logout = async (req, res) => {
         res.status(200).json({ success: true, message: "Logout successful" })
     } catch (error) {
         console.error("Error in logout controller", error)
+        res.status(500).json({ success: false, message: "Internal server error" })
+    }
+}
+
+export const getCurrentUser = async (req, res) => {
+    try {
+        const { token } = req.cookies
+        if (!token) {
+            return res.status(401).json({ success: false, message: "Unauthorized" })
+        }
+        const decoded = jwt.verify(token, JWT_SECRET)
+        if (!decoded) {
+            return res.status(401).json({ success: false, message: "Unauthorized" })
+        }
+        const user = await getUserById(decoded.userId)
+        if (!user) {
+            return res.status(401).json({ success: false, message: "Unauthorized" })
+        }
+        res.status(200).json({ success: true, user })
+    } catch (error) {
+        console.error("Error in getCurrentUser controller", error)
         res.status(500).json({ success: false, message: "Internal server error" })
     }
 }

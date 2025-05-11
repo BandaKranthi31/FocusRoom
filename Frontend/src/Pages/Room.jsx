@@ -1,20 +1,47 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useRoom } from '../Context/RoomContext';
-import Popup from 'reactjs-popup'; 
+import Popup from 'reactjs-popup';
 import { FaTimes } from 'react-icons/fa';
 import Chat from '../Components/Chat';
 import Notes from '../Components/Notes';
 
 const Room = () => {
+  const [user, setUser] = useState(null)
   const { roomSettings } = useRoom();
   const [workTimeLeft, setWorkTimeLeft] = useState(roomSettings.time * 60);
   const [breakTimeLeft, setBreakTimeLeft] = useState(roomSettings.break * 60);
   const [isRunning, setIsRunning] = useState(false);
-  const [isBreak, setIsBreak] = useState(false); 
+  const [isBreak, setIsBreak] = useState(false);
   const intervalRef = useRef(null);
 
   const randomNames = ['Fong', 'notFong', 'MaybeFong', 'IamFony', 'whyFong'];
   const [peopleInRoom, setPeopleInRoom] = useState(randomNames);
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/auth/current-user", {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await response.json();
+        if (data.success) {
+          setUser(data.user);
+          // console.log(data.user)
+        } else {
+          navigate("/login")
+          toast.error(data.message || "Something went wrong")
+        }
+      } catch (error) {
+        console.error("Error fetching current user", error)
+        toast.error("Something went wrong")
+        navigate("/login")
+      }
+    }
+    fetchCurrentUser();
+  }, [navigate])
 
   const formatTime = (seconds) => {
     const m = String(Math.floor(seconds / 60)).padStart(2, '0');
@@ -34,7 +61,7 @@ const Room = () => {
             setIsBreak(false);
             setWorkTimeLeft(roomSettings.time * 60);
             setIsRunning(false);
-            return roomSettings.break * 60; 
+            return roomSettings.break * 60;
           }
           return prev - 1;
         });
@@ -46,7 +73,7 @@ const Room = () => {
             setIsBreak(true);
             setBreakTimeLeft(roomSettings.break * 60);
             setIsRunning(false);
-            return roomSettings.time * 60; 
+            return roomSettings.time * 60;
           }
           return prev - 1;
         });
@@ -64,9 +91,9 @@ const Room = () => {
     clearInterval(intervalRef.current);
     intervalRef.current = null;
     setIsRunning(false);
-    setIsBreak(false); 
-    setWorkTimeLeft(roomSettings.time * 60); 
-    setBreakTimeLeft(roomSettings.break * 60); 
+    setIsBreak(false);
+    setWorkTimeLeft(roomSettings.time * 60);
+    setBreakTimeLeft(roomSettings.break * 60);
   };
 
   useEffect(() => {

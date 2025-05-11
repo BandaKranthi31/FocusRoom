@@ -21,6 +21,7 @@ const Login = () => {
       const response = await fetch(`http://localhost:3000/api/auth/login`, {  //update later
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
       const data = await response.json();
